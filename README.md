@@ -141,7 +141,7 @@ Contributions are welcome and encouraged. To contribute:
 - Submit a clean Pull Request targeting the base branch.
 
 ### License
-This framework is released under the [MIT License](license.md).
+This framework is released under the [MIT License](LICENSE.md).
 
 
 ### Frequently Asked Questions (FAQ)
