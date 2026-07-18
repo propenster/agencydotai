@@ -1,0 +1,6 @@
+.spyproject
+__pycache__
+*.bin
+*.cfg
+*.env
+/__pycache__

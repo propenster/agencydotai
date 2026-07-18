@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Agency Framework - Debug Dashboard</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background: #121212; color: #e0e0e0; margin: 0; padding: 20px; }
+        h1 { border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .log-container { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .message-card { background: #1e1e1e; border: 1px solid #333; padding: 15px; border-radius: 8px; }
+        .topic-badge { background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;}
+        .sender-badge { background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;}
+        pre { background: #000; padding: 10px; border-radius: 4px; overflow-x: auto; color: #a5d6ff; }
+    </style>
+</head>
+<body>
+    <h1>🛰️ Event Bus Firehose</h1>
+    <p>Live view of all agent communications.</p>
+    
+    <div class="log-container" id="logs">
+        <!-- Messages will be injected here via JavaScript -->
+    </div>
+
+    <script>
+        let logCount = 0;
+
+        async function fetchLogs() {
+            try {
+                const response = await fetch('/api/firehose');
+                const data = await response.json();
+                
+                // Only update the DOM if there are new messages
+                if (data.logs.length > logCount) {
+                    const container = document.getElementById('logs');
+                    container.innerHTML = ''; // Clear old logs
+                    
+                    // Render newest messages at the top
+                    [...data.logs].reverse().forEach(msg => {
+                        const env = msg.envelope;
+                        const card = document.createElement('div');
+                        card.className = 'message-card';
+                        card.innerHTML = `
+                            <div style="margin-bottom: 10px;">
+                                <span class="sender-badge">${env.sender}</span>
+                                <span style="margin: 0 10px;">published to ➔</span>
+                                <span class="topic-badge">${env.topic}</span>
+                            </div>
+                            <pre>${JSON.stringify(msg.payload, null, 2)}</pre>
+                        `;
+                        container.appendChild(card);
+                    });
+                    logCount = data.logs.length;
+                }
+            } catch (err) {
+                console.error("Failed to fetch logs", err);
+            }
+        }
+
+        // Poll the server every 1.5 seconds
+        setInterval(fetchLogs, 1500);
+        fetchLogs(); // Initial fetch
+    </script>
+</body>
+</html>

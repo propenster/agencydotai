@@ -1,0 +1,24 @@
+version: '1.0'
+globals:
+  broker: "memory"
+topics:
+  - id: "client_requests"
+  - id: "research_tasks"
+  - id: "research_results"
+  - id: "human_oversight"
+agents:
+  manager_agent:
+    role: "hub"
+    system_prompt_file: "./prompts/manager.md"
+    subscribes: ["client_requests", "research_results"]
+    publishes: ["research_tasks", "human_oversight"]
+    interrupts:
+      on_confidence_below: 0.70
+  researcher_agent:
+    role: "spoke"
+    system_prompt_file: "./prompts/researcher.md"
+    subscribes: ["research_tasks"]
+    publishes: ["research_results"]
+    tools: ["web_scraper"]
+    interrupts:
+      require_approval_for: ["web_scraper"]
